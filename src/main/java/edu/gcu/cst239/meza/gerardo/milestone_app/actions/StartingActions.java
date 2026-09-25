@@ -13,7 +13,10 @@ import edu.gcu.cst239.meza.gerardo.milestone_app.util.InputUtilities;
 public class StartingActions {
 
     private final StoreFront store;
-
+    /**
+     * 
+     * @param store shared storefront application
+     */
     public StartingActions(StoreFront store) {
         this.store = store;
     }
