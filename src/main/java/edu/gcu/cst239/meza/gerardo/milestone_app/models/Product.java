@@ -4,6 +4,9 @@ package edu.gcu.cst239.meza.gerardo.milestone_app.models;
 import java.time.LocalDate;
 import java.util.Objects;
 
+/**
+ * Represents a product that can be sold and store in inventory.
+ */
 public class Product {
  
     private final int id;
@@ -26,26 +29,51 @@ public class Product {
         return new Builder();
     }
  
+    /**
+     * Returns the product identifier
+     * 
+     * @return product identifier
+     */
     public int getId() {
         return id;
     }
- 
+    /**
+     * Returns the product name.
+     * 
+     * @return product name
+     */
     public String getName() {
         return name;
     }
- 
+    /**
+     * Return the product description
+     * 
+     * @return product description
+     */
     public String getDescription() {
         return description;
     }
- 
+    /**
+     * Return the product manufacture date
+     * 
+     * @return manufacture date
+     */
     public LocalDate getDateOfManufacture() {
         return dateOfManufacture;
     }
- 
+    /**
+     * Return the product price
+     * 
+     * @return product price
+     */
     public double getPrice() {
         return price;
     }
- 
+    /**
+     * Return the product category
+     * 
+     * @return product category
+     */
     public String getCategory() {
         return category;
     }
@@ -89,39 +117,72 @@ public class Product {
  
         private Builder() {
         }
- 
+        /**
+         * Set the product identifier
+         * 
+         * @param id product identifier
+         * @return this builder
+         */
         public Builder id(int id) {
             this.id = id;
             return this;
         }
- 
+        /**
+         * Sets the product name
+         * 
+         * @param name product name
+         * @return this builder
+         */
         public Builder name(String name) {
             this.name = name;
             return this;
         }
- 
+        /**
+         * Sets the product description.
+         *
+         * @param description product description
+         * @return this builder
+         */
         public Builder description(String description) {
             this.description = description;
             return this;
         }
- 
+        /**
+         * Sets the product manufacture date.
+         *
+         * @param dateOfManufacture manufacture date
+         * @return this builder
+         */
         public Builder dateOfManufacture(
                 LocalDate dateOfManufacture) {
  
             this.dateOfManufacture = dateOfManufacture;
             return this;
         }
- 
+        /**
+         * Set the product price
+         * 
+         * @param price
+         * @return
+         */
         public Builder price(double price) {
             this.price = price;
             return this;
         }
- 
+        /**
+         * Set the product category
+         * 
+         * @param category product category
+         * @return this builder
+         */
         public Builder category(String category) {
             this.category = category;
             return this;
         }
- 
+        /**
+         * 
+         * @return complete product
+         */
         public Product build() {
             validate();
             return new Product(this);
