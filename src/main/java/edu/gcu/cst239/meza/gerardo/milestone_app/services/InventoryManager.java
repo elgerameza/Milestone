@@ -193,8 +193,17 @@ public class InventoryManager implements InventoryService {
      */
     @Override
     public boolean addInventoryItem(InventoryItem item) {
-        throw new UnsupportedOperationException(
-                "Method will be implemented in a later branch.");
+        if (item == null || item.getProduct() == null) {
+            return false;
+        }
+
+        int productId = item.getProduct().getId();
+
+        if (getInventoryItemByProductId(productId) != null) {
+            return false;
+        }
+
+        return inventory.add(item);
     }
 
     /**
@@ -205,8 +214,26 @@ public class InventoryManager implements InventoryService {
      */
     @Override
     public boolean updateProduct(Product updatedProduct) {
-        throw new UnsupportedOperationException(
-                "Method will be implemented in a later branch.");
+        if (updatedProduct == null) {
+            return false;
+        }
+
+        for (int index = 0; index < inventory.size(); index++) {
+            InventoryItem currentItem = inventory.get(index);
+
+            if (currentItem.getProduct().getId()
+                    == updatedProduct.getId()) {
+
+                InventoryItem updatedItem = new InventoryItem(
+                        updatedProduct,
+                        currentItem.getQuantityInStock());
+
+                inventory.set(index, updatedItem);
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -221,8 +248,32 @@ public class InventoryManager implements InventoryService {
             int productId,
             int quantityInStock) {
 
-        throw new UnsupportedOperationException(
-                "Method will be implemented in a later branch.");
+        if (quantityInStock < 0) {
+            return false;
+        }
+
+        InventoryItem item =
+                getInventoryItemByProductId(productId);
+
+        if (item == null) {
+            return false;
+        }
+
+        int currentQuantity = item.getQuantityInStock();
+
+        if (quantityInStock == currentQuantity) {
+            return true;
+        }
+
+        if (quantityInStock > currentQuantity) {
+            item.increaseQuantity(
+                    quantityInStock - currentQuantity);
+        } else {
+            item.decreaseQuantity(
+                    currentQuantity - quantityInStock);
+        }
+
+        return true;
     }
 
     /**
@@ -233,8 +284,14 @@ public class InventoryManager implements InventoryService {
      */
     @Override
     public boolean removeProductById(int productId) {
-        throw new UnsupportedOperationException(
-                "Method will be implemented in a later branch.");
+        InventoryItem item =
+                getInventoryItemByProductId(productId);
+
+        if (item == null) {
+            return false;
+        }
+
+        return inventory.remove(item);
     }
 
     /**
@@ -242,7 +299,6 @@ public class InventoryManager implements InventoryService {
      */
     @Override
     public void clearInventory() {
-        throw new UnsupportedOperationException(
-                "Method will be implemented in a later branch.");
+        inventory.clear();
     }
 }
