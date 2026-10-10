@@ -66,8 +66,7 @@ public class StoreManagerActions {
                     break;
 
                 case 5:
-                    displayPlaceholder(
-                            "update a product in inventory");
+                    updateProduct(input);
                     break;
 
                 case 6:
@@ -269,6 +268,97 @@ public class StoreManagerActions {
         } else {
             System.out.println(
                     "Product ID was not found. Inventory was not changed.");
+        }
+    }
+
+    /**
+     * Updates either product information or stock quantity for an
+     * existing product. Product information updates preserve stock.
+     *
+     * @param input utility used to read console input
+     */
+    private void updateProduct(InputUtilities input) {
+        InventoryService inventoryService = store.getInventoryManager();
+
+        System.out.println();
+        System.out.println("--- Update Product in Inventory ---");
+
+        int productId = input.readInt(
+                "Enter product ID to update: ", 1, Integer.MAX_VALUE);
+
+        InventoryItem currentItem =
+                inventoryService.getInventoryItemByProductId(productId);
+
+        if (currentItem == null) {
+            System.out.println(
+                    "Product ID was not found. Inventory was not changed.");
+            return;
+        }
+
+        System.out.println("Current item:");
+        System.out.println(currentItem);
+        System.out.println();
+        System.out.println("1. Update product information");
+        System.out.println("2. Update stock quantity");
+        System.out.println("0. Return to manager menu");
+
+        int updateType = input.readInt("Choose an option: ", 0, 2);
+
+        if (updateType == 0) {
+            return;
+        }
+
+        if (updateType == 2) {
+            int quantity = input.readInt("Enter new stock quantity: ");
+
+            if (inventoryService.updateQuantity(productId, quantity)) {
+                System.out.println("Stock quantity updated successfully.");
+            } else {
+                System.out.println(
+                        "Update failed. Quantity cannot be negative, "
+                                + "and the product must exist.");
+            }
+
+            return;
+        }
+
+        String name = readRequiredText(
+                input, "Enter new product name: ");
+
+        String description = readRequiredText(
+                input, "Enter new product description: ");
+
+        LocalDate dateOfManufacture = input.readLocalDate(
+                "Enter new manufacture date: ", "uuuu-MM-dd");
+
+        double price = input.readDouble(
+                "Enter new product price: ", 0.0, Double.MAX_VALUE);
+
+        String category = readRequiredText(
+                input, "Enter new product category: ");
+
+        try {
+            Product updatedProduct = Product.builder()
+                    .id(productId)
+                    .name(name)
+                    .description(description)
+                    .dateOfManufacture(dateOfManufacture)
+                    .price(price)
+                    .category(category)
+                    .build();
+
+            if (inventoryService.updateProduct(updatedProduct)) {
+                System.out.println(
+                        "Product information updated successfully. "
+                                + "Stock quantity was preserved.");
+            } else {
+                System.out.println(
+                        "Product could not be updated. Inventory was not changed.");
+            }
+        } catch (IllegalArgumentException exception) {
+            System.out.println(
+                    "Product could not be updated: "
+                            + exception.getMessage());
         }
     }
     /**
