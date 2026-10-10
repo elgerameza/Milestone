@@ -70,7 +70,7 @@ public class CustomerActions {
                     break;
 
                 case 6:
-                    displayPlaceholder("checkout");
+                    checkout(input);
                     break;
 
                 case 0:
@@ -363,6 +363,44 @@ public class CustomerActions {
             System.out.println(
                     "Cart was not changed. Check the product ID and stock, "
                             + "and enter a different, nonnegative quantity.");
+        }
+    }
+    /**
+     * Displays the final cart and asks the customer to confirm checkout.
+     * Cancellation leaves inventory and the cart unchanged.
+     *
+     * @param input utility used to read console input
+     */
+    private void checkout(InputUtilities input) {
+        System.out.println();
+        System.out.println("--- Checkout ---");
+
+        if (!displayCartSummary()) {
+            return;
+        }
+
+        System.out.println();
+        System.out.println("1. Confirm purchase");
+        System.out.println("0. Cancel");
+
+        int choice = input.readInt("Choose an option: ", 0, 1);
+
+        if (choice == 0) {
+            System.out.println(
+                    "Checkout cancelled. Your cart was not changed.");
+            return;
+        }
+
+        CartService cartService = store.getShoppingCart();
+
+        if (cartService.checkout()) {
+            System.out.println(
+                    "Purchase completed successfully. Your cart is now empty.");
+        } else {
+            System.out.println(
+                    "Checkout failed. A product may have been removed "
+                            + "or have insufficient stock. "
+                            + "Inventory and your cart were not changed.");
         }
     }
     /**
