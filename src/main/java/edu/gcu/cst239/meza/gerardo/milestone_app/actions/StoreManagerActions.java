@@ -62,8 +62,7 @@ public class StoreManagerActions {
                     break;
 
                 case 4:
-                    displayPlaceholder(
-                            "remove a product from inventory");
+                    removeProduct(input);
                     break;
 
                 case 5:
@@ -250,6 +249,28 @@ public class StoreManagerActions {
         }
     }
 
+    /**
+     * Collects a product ID and delegates inventory removal
+     * to the shared inventory service.
+     *
+     * @param input utility used to read console input
+     */
+    private void removeProduct(InputUtilities input) {
+        System.out.println();
+        System.out.println("--- Remove Product from Inventory ---");
+
+        int productId = input.readInt(
+                "Enter product ID to remove: ", 1, Integer.MAX_VALUE);
+
+        InventoryService inventoryService = store.getInventoryManager();
+
+        if (inventoryService.removeProductById(productId)) {
+            System.out.println("Product removed successfully.");
+        } else {
+            System.out.println(
+                    "Product ID was not found. Inventory was not changed.");
+        }
+    }
     /**
      * Displays a message for an operation that is not implemented yet.
      *
