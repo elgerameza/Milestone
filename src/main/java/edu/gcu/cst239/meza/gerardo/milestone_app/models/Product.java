@@ -162,8 +162,8 @@ public class Product {
         /**
          * Set the product price
          * 
-         * @param price
-         * @return
+         * @param price product price
+         * @return this builder
          */
         public Builder price(double price) {
             this.price = price;

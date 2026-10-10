@@ -1,7 +1,11 @@
 package edu.gcu.cst239.meza.gerardo.milestone_app.actions;
 
+import java.util.List; 
+
 import edu.gcu.cst239.meza.gerardo.milestone_app.services.StoreFront;
 import edu.gcu.cst239.meza.gerardo.milestone_app.util.InputUtilities;
+import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
+import edu.gcu.cst239.meza.gerardo.milestone_app.services.InventoryService;
 
 /**
  * Handles actions available to a store manager, including viewing,
@@ -46,7 +50,7 @@ public class StoreManagerActions {
 
             switch (choice) {
                 case 1:
-                    displayPlaceholder("view products");
+                    displayProducts();
                     break;
 
                 case 2:
@@ -90,7 +94,27 @@ public class StoreManagerActions {
             }
         }
     }
+    /**
+    * Displays every inventory product and its current stock quantity.
+    * Inventory is retrieved through the shared inventory service.
+    */
+    private void displayProducts() {
+        InventoryService inventoryService = store.getInventoryManager();
+        List<InventoryItem> items =
+                inventoryService.getAllInventoryItems();
 
+        if (items.isEmpty()) {
+            System.out.println("The inventory is empty.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("--- Formula-Car Parts Inventory ---");
+
+        for (InventoryItem item : items) {
+            System.out.println(item);
+        }
+    }
     /**
      * Displays the temporary Milestone 1 placeholder message.
      *
