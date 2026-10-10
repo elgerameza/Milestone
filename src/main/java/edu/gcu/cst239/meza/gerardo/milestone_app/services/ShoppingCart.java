@@ -180,14 +180,46 @@ public class ShoppingCart implements CartService {
     }
 
     /**
-     * Temporarily leaves inventory and cart unchanged until the
-     * checkout feature is implemented.
+     * Validates every cart item before completing the purchase.
+     * Successful checkout reduces purchased stock and clears the cart.
+     * An empty cart or unavailable stock leaves both collections unchanged.
      *
-     * @return false because checkout is not implemented yet
+     * @return true when checkout succeeds; false if validation fails
      */
     @Override
     public boolean checkout() {
-        return false;
+        if (cartItems.isEmpty()) {
+            return false;
+        }
+
+        // Validate the entire purchase before changing any stock.
+        for (CartItem item : cartItems) {
+            InventoryItem inventoryItem =
+                    inventoryService.getInventoryItemByProductId(
+                            item.getProduct().getId());
+
+            if (inventoryItem == null
+                    || item.getQuantity() <= 0
+                    || item.getQuantity() > inventoryItem.getQuantityInStock()) {
+                return false;
+            }
+        }
+
+        // All items are valid. Apply the purchase to shared inventory.
+        for (CartItem item : cartItems) {
+            int productId = item.getProduct().getId();
+
+            InventoryItem inventoryItem =
+                    inventoryService.getInventoryItemByProductId(productId);
+
+            int remainingStock =
+                    inventoryItem.getQuantityInStock() - item.getQuantity();
+
+            inventoryService.updateQuantity(productId, remainingStock);
+        }
+
+        clearCart();
+        return true;
     }
 
     /**
