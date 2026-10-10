@@ -1,5 +1,9 @@
 package edu.gcu.cst239.meza.gerardo.milestone_app.actions;
 
+import java.util.List;
+
+import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
+import edu.gcu.cst239.meza.gerardo.milestone_app.services.InventoryService;
 import edu.gcu.cst239.meza.gerardo.milestone_app.services.StoreFront;
 import edu.gcu.cst239.meza.gerardo.milestone_app.util.InputUtilities;
 
@@ -44,7 +48,7 @@ public class CustomerActions {
 
             switch (choice) {
                 case 1:
-                    displayPlaceholder("view products");
+                    displayProducts(input);
                     break;
 
                 case 2:
@@ -81,6 +85,62 @@ public class CustomerActions {
             }
         }
     }
+    /**
+     * Displays in-stock products in the customer's selected order.
+     *
+     * @param input utility used to read console input
+     */
+    private void displayProducts(InputUtilities input) {
+        System.out.println();
+        System.out.println("--- Browse Products ---");
+        System.out.println("1. Sort by name");
+        System.out.println("2. Sort by manufacture date");
+        System.out.println("3. Sort by price");
+        System.out.println("0. Return to customer menu");
+
+        int sortChoice = input.readInt("Choose an option: ", 0, 3);
+
+        if (sortChoice == 0) {
+            return;
+        }
+
+        InventoryService inventoryService = store.getInventoryManager();
+        List<InventoryItem> items;
+
+        switch (sortChoice) {
+            case 1:
+                items = inventoryService.getInventoryItemsSortedByName();
+                break;
+
+            case 2:
+                items = inventoryService.getInventoryItemsSortedByDate();
+                break;
+
+            case 3:
+                items = inventoryService.getInventoryItemsSortedByPrice();
+                break;
+
+            default:
+                return;
+        }
+
+        System.out.println();
+        System.out.println("--- Available Products ---");
+
+        boolean availableProductsFound = false;
+
+        for (InventoryItem item : items) {
+            if (item.getQuantityInStock() > 0) {
+                System.out.println(item);
+                availableProductsFound = true;
+            }
+        }
+
+        if (!availableProductsFound) {
+            System.out.println("No products are currently available.");
+        }
+    }
+    
 
     /**
      * Displays the temporary Milestone 1 placeholder message.
