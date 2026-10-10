@@ -107,16 +107,43 @@ public class ShoppingCart implements CartService {
     }
 
     /**
-     * Temporarily leaves quantities unchanged until the cart-update
-     * feature is implemented.
+     * Replaces an existing cart item's quantity after checking stock.
+     * A quantity of zero removes the item. Inventory is not changed.
      *
      * @param productId product identifier
-     * @param quantity requested quantity
-     * @return false because this operation is not implemented yet
+     * @param quantity new purchase quantity
+     * @return true when the cart changes; false if invalid or unchanged
      */
     @Override
     public boolean updateQuantity(int productId, int quantity) {
-        return false;
+        if (quantity < 0) {
+            return false;
+        }
+
+        CartItem item = findCartItem(productId);
+
+        if (item == null) {
+            return false;
+        }
+
+        if (quantity == 0) {
+            return removeProductFromCart(productId);
+        }
+
+        InventoryItem inventoryItem =
+                inventoryService.getInventoryItemByProductId(productId);
+
+        if (inventoryItem == null
+                || quantity > inventoryItem.getQuantityInStock()) {
+            return false;
+        }
+
+        if (quantity == item.getQuantity()) {
+            return false;
+        }
+
+        item.setQuantity(quantity);
+        return true;
     }
 
     /**

@@ -66,7 +66,7 @@ public class CustomerActions {
                     break;
 
                 case 5:
-                    displayPlaceholder("view the cart");
+                    viewCart(input);
                     break;
 
                 case 6:
@@ -290,6 +290,79 @@ public class CustomerActions {
         } else {
             System.out.println(
                     "Product was not found in your cart. Nothing was changed.");
+        }
+    }
+    /**
+     * Displays cart items, quantities, line subtotals, and the cart total.
+     *
+     * @return true when the cart contains items
+     */
+    private boolean displayCartSummary() {
+        CartService cartService = store.getShoppingCart();
+        List<CartItem> items = cartService.getAllCartItems();
+
+        System.out.println();
+        System.out.println("--- Shopping Cart ---");
+
+        if (items.isEmpty()) {
+            System.out.println("Your cart is empty.");
+            return false;
+        }
+
+        for (CartItem item : items) {
+            System.out.printf(
+                    java.util.Locale.US,
+                    "ID: %d | %s | Quantity: %d | Unit price: $%,.2f"
+                            + " | Subtotal: $%,.2f%n",
+                    item.getProduct().getId(),
+                    item.getProduct().getName(),
+                    item.getQuantity(),
+                    item.getProduct().getPrice(),
+                    item.getSubtotal());
+        }
+
+        System.out.printf(
+                java.util.Locale.US,
+                "Cart total: $%,.2f%n",
+                cartService.getCartTotal());
+
+        return true;
+    }
+
+    /**
+     * Displays the cart and lets the customer keep current quantities
+     * or update one item. Setting a quantity to zero removes that item.
+     *
+     * @param input utility used to read console input
+     */
+    private void viewCart(InputUtilities input) {
+        if (!displayCartSummary()) {
+            return;
+        }
+
+        System.out.println();
+        System.out.println("1. Update an item's quantity");
+        System.out.println("0. Keep quantities and return");
+
+        int choice = input.readInt("Choose an option: ", 0, 1);
+
+        if (choice == 0) {
+            return;
+        }
+
+        int productId = input.readInt("Enter product ID to update: ");
+        int quantity = input.readInt(
+                "Enter new quantity (0 removes the item): ");
+
+        CartService cartService = store.getShoppingCart();
+
+        if (cartService.updateQuantity(productId, quantity)) {
+            System.out.println("Cart updated successfully.");
+            displayCartSummary();
+        } else {
+            System.out.println(
+                    "Cart was not changed. Check the product ID and stock, "
+                            + "and enter a different, nonnegative quantity.");
         }
     }
     /**
