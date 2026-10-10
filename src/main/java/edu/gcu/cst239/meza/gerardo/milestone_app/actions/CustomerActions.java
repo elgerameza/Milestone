@@ -52,8 +52,7 @@ public class CustomerActions {
                     break;
 
                 case 2:
-                    displayPlaceholder(
-                            "search for a product by name or description");
+                    searchProducts(input);
                     break;
 
                 case 3:
@@ -141,6 +140,66 @@ public class CustomerActions {
         }
     }
     
+    /**
+     * Searches products by name or description through the inventory
+     * service and displays every match with its availability.
+     *
+     * @param input utility used to read console input
+     */
+    private void searchProducts(InputUtilities input) {
+        System.out.println();
+        System.out.println("--- Search Products ---");
+        System.out.println("1. Search by name");
+        System.out.println("2. Search by description");
+        System.out.println("0. Return to customer menu");
+
+        int searchType = input.readInt("Choose an option: ", 0, 2);
+
+        if (searchType == 0) {
+            return;
+        }
+
+        String searchTerm = input.readString(
+                "Enter a search term: ").trim();
+
+        if (searchTerm.isBlank()) {
+            System.out.println("The search term cannot be blank.");
+            return;
+        }
+
+        InventoryService inventoryService = store.getInventoryManager();
+        List<InventoryItem> matches;
+
+        if (searchType == 1) {
+            matches = inventoryService.searchProductsByName(searchTerm);
+        } else {
+            matches = inventoryService.searchProductsByDescription(
+                    searchTerm);
+        }
+
+        if (matches.isEmpty()) {
+            System.out.println("No products matched your search.");
+            return;
+        }
+
+        System.out.println();
+        System.out.println("--- Search Results ---");
+
+        for (InventoryItem item : matches) {
+            System.out.println(item);
+
+            if (item.getQuantityInStock() > 0) {
+                System.out.println(
+                        "Availability: In stock ("
+                                + item.getQuantityInStock()
+                                + " available)");
+            } else {
+                System.out.println("Availability: Out of stock");
+            }
+
+            System.out.println();
+        }
+    }
 
     /**
      * Displays the temporary Milestone 1 placeholder message.
