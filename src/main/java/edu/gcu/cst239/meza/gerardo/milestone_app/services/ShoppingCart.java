@@ -120,15 +120,20 @@ public class ShoppingCart implements CartService {
     }
 
     /**
-     * Temporarily leaves the cart unchanged until the removal
-     * feature is implemented.
+     * Removes the selected cart item without changing inventory stock.
      *
      * @param productId product identifier
-     * @return false because this operation is not implemented yet
+     * @return true when removed; false if the item was not in the cart
      */
     @Override
     public boolean removeProductFromCart(int productId) {
-        return false;
+        CartItem item = findCartItem(productId);
+
+        if (item == null) {
+            return false;
+        }
+
+        return cartItems.remove(item);
     }
 
     /**
