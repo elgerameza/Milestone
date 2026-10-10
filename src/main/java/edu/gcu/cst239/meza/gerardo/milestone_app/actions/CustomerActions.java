@@ -62,8 +62,7 @@ public class CustomerActions {
                     break;
 
                 case 4:
-                    displayPlaceholder(
-                            "remove a product from the cart");
+                    removeFromCart(input);
                     break;
 
                 case 5:
@@ -259,14 +258,47 @@ public class CustomerActions {
         }
     }
     /**
+     * Displays the cart and delegates removal of a selected product
+     * to the shared cart service.
+     *
+     * @param input utility used to read console input
+     */
+    private void removeFromCart(InputUtilities input) {
+        CartService cartService = store.getShoppingCart();
+        List<CartItem> items = cartService.getAllCartItems();
+
+        System.out.println();
+        System.out.println("--- Remove Product from Cart ---");
+
+        if (items.isEmpty()) {
+            System.out.println("Your cart is empty.");
+            return;
+        }
+
+        for (CartItem item : items) {
+            System.out.println(
+                    "ID: " + item.getProduct().getId()
+                            + " | " + item.getProduct().getName()
+                            + " | Quantity: " + item.getQuantity());
+        }
+
+        int productId = input.readInt(
+                "Enter product ID to remove from cart: ");
+
+        if (cartService.removeProductFromCart(productId)) {
+            System.out.println("Product removed from cart successfully.");
+        } else {
+            System.out.println(
+                    "Product was not found in your cart. Nothing was changed.");
+        }
+    }
+    /**
      * Displays the temporary Milestone 1 placeholder message.
      *
      * @param action description of the selected action
      */
     private void displayPlaceholder(String action) {
         System.out.println("You chose to " + action + ".");
-        System.out.println(
-                "This is milestone #1. "
-                        + "No actual functionality has been implemented yet.");
+        System.out.println("This feature has not been implemented yet.");
     }
 }
