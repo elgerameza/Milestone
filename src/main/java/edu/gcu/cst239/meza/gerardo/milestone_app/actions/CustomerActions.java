@@ -6,6 +6,8 @@ import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
 import edu.gcu.cst239.meza.gerardo.milestone_app.services.InventoryService;
 import edu.gcu.cst239.meza.gerardo.milestone_app.services.StoreFront;
 import edu.gcu.cst239.meza.gerardo.milestone_app.util.InputUtilities;
+import edu.gcu.cst239.meza.gerardo.milestone_app.models.CartItem;
+import edu.gcu.cst239.meza.gerardo.milestone_app.services.CartService;
 
 /**
  * Handles the actions available to customers, including browsing
@@ -56,8 +58,7 @@ public class CustomerActions {
                     break;
 
                 case 3:
-                    displayPlaceholder(
-                            "add a product to the cart");
+                    addToCart(input);
                     break;
 
                 case 4:
@@ -201,6 +202,62 @@ public class CustomerActions {
         }
     }
 
+    /**
+ * Displays available products and delegates a requested cart
+ * addition to the shared cart service.
+ *
+ * @param input utility used to read console input
+ */
+    private void addToCart(InputUtilities input) {
+        InventoryService inventoryService = store.getInventoryManager();
+        CartService cartService = store.getShoppingCart();
+
+        System.out.println();
+        System.out.println("--- Add Product to Cart ---");
+
+        boolean productsAvailable = false;
+
+        for (InventoryItem item : inventoryService.getAllInventoryItems()) {
+            if (item.getQuantityInStock() > 0) {
+                System.out.println(item);
+                productsAvailable = true;
+            }
+        }
+
+        if (!productsAvailable) {
+            System.out.println("No products are currently available.");
+            return;
+        }
+
+        int productId = input.readInt("Enter product ID: ");
+
+        InventoryItem selectedItem =
+                inventoryService.getInventoryItemByProductId(productId);
+
+        if (selectedItem == null) {
+            System.out.println("Product ID was not found.");
+            return;
+        }
+
+        int quantity = input.readInt("Enter quantity to add: ");
+
+        if (!cartService.addProduct(selectedItem.getProduct(), quantity)) {
+            System.out.println(
+                    "Could not add product. Quantity must be positive, "
+                            + "and the combined cart quantity cannot exceed stock.");
+            return;
+        }
+
+        System.out.println("Product added to cart successfully.");
+
+        for (CartItem item : cartService.getAllCartItems()) {
+            if (item.getProduct().getId() == productId) {
+                System.out.println(
+                        "Quantity now in cart: " + item.getQuantity());
+                break;
+            }
+        }
+    }
     /**
      * Displays the temporary Milestone 1 placeholder message.
      *
