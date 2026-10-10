@@ -2,6 +2,7 @@ package edu.gcu.cst239.meza.gerardo.milestone_app.services;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
@@ -102,6 +103,55 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
+     * Returns inventory in ascending, case-insensitive product name
+     * order without changing the stored inventory order.
+     *
+     * @return a sorted copy of the inventory
+     */
+    @Override
+    public List<InventoryItem> getInventoryItemsSortedByName() {
+        List<InventoryItem> sortedItems = new ArrayList<>(inventory);
+
+        sortedItems.sort(Comparator.comparing(
+                item -> item.getProduct().getName(),
+                String.CASE_INSENSITIVE_ORDER));
+
+        return sortedItems;
+    }
+
+    /**
+     * Returns inventory from oldest to newest manufacture date
+     * without changing the stored inventory order.
+     *
+     * @return a sorted copy of the inventory
+     */
+    @Override
+    public List<InventoryItem> getInventoryItemsSortedByDate() {
+        List<InventoryItem> sortedItems = new ArrayList<>(inventory);
+
+        sortedItems.sort(Comparator.comparing(
+                item -> item.getProduct().getDateOfManufacture()));
+
+        return sortedItems;
+    }
+
+    /**
+     * Returns inventory from lowest to highest product price
+     * without changing the stored inventory order.
+     *
+     * @return a sorted copy of the inventory
+     */
+    @Override
+    public List<InventoryItem> getInventoryItemsSortedByPrice() {
+        List<InventoryItem> sortedItems = new ArrayList<>(inventory);
+
+        sortedItems.sort(Comparator.comparingDouble(
+                item -> item.getProduct().getPrice()));
+
+        return sortedItems;
+    }
+
+    /**
      * Finds an inventory item using its product identifier.
      *
      * @param productId product identifier
@@ -125,9 +175,7 @@ public class InventoryManager implements InventoryService {
      * @return matching inventory items
      */
     @Override
-    public List<InventoryItem> searchProductsByName(
-            String searchTerm) {
-
+    public List<InventoryItem> searchProductsByName(String searchTerm) {
         List<InventoryItem> matches = new ArrayList<>();
 
         if (searchTerm == null || searchTerm.isBlank()) {
@@ -138,12 +186,10 @@ public class InventoryManager implements InventoryService {
                 searchTerm.trim().toLowerCase(Locale.ROOT);
 
         for (InventoryItem item : inventory) {
-            String productName =
-                    item.getProduct().getName();
+            String productName = item.getProduct().getName();
 
             if (productName.toLowerCase(Locale.ROOT)
                     .contains(normalizedTerm)) {
-
                 matches.add(item);
             }
         }
@@ -177,7 +223,6 @@ public class InventoryManager implements InventoryService {
 
             if (productDescription.toLowerCase(Locale.ROOT)
                     .contains(normalizedTerm)) {
-
                 matches.add(item);
             }
         }
@@ -186,10 +231,10 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Adds an inventory item.
+     * Adds an inventory item with a unique product identifier.
      *
      * @param item inventory item to add
-     * @return true when the item is added
+     * @return true when added; false if null or the ID already exists
      */
     @Override
     public boolean addInventoryItem(InventoryItem item) {
@@ -207,10 +252,10 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Updates an existing product.
+     * Updates an existing product while preserving its stock quantity.
      *
      * @param updatedProduct updated product information
-     * @return true when the product is updated
+     * @return true when updated; false if null or not found
      */
     @Override
     public boolean updateProduct(Product updatedProduct) {
@@ -241,19 +286,17 @@ public class InventoryManager implements InventoryService {
      *
      * @param productId product identifier
      * @param quantityInStock new inventory quantity
-     * @return true when the quantity is updated
+     * @return true when updated; false if negative or not found
      */
     @Override
     public boolean updateQuantity(
-            int productId,
-            int quantityInStock) {
+            int productId, int quantityInStock) {
 
         if (quantityInStock < 0) {
             return false;
         }
 
-        InventoryItem item =
-                getInventoryItemByProductId(productId);
+        InventoryItem item = getInventoryItemByProductId(productId);
 
         if (item == null) {
             return false;
@@ -266,11 +309,9 @@ public class InventoryManager implements InventoryService {
         }
 
         if (quantityInStock > currentQuantity) {
-            item.increaseQuantity(
-                    quantityInStock - currentQuantity);
+            item.increaseQuantity(quantityInStock - currentQuantity);
         } else {
-            item.decreaseQuantity(
-                    currentQuantity - quantityInStock);
+            item.decreaseQuantity(currentQuantity - quantityInStock);
         }
 
         return true;
@@ -280,12 +321,11 @@ public class InventoryManager implements InventoryService {
      * Removes an inventory item using its product identifier.
      *
      * @param productId product identifier
-     * @return true when the item is removed
+     * @return true when removed; false if not found
      */
     @Override
     public boolean removeProductById(int productId) {
-        InventoryItem item =
-                getInventoryItemByProductId(productId);
+        InventoryItem item = getInventoryItemByProductId(productId);
 
         if (item == null) {
             return false;
