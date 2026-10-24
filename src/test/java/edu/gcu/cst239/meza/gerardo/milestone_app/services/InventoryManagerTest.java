@@ -1,8 +1,10 @@
 package edu.gcu.cst239.meza.gerardo.milestone_app.services;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,7 +15,7 @@ import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.Product;
 
 /**
- * Verifies inventory independence and query behavior.
+ * Verifies inventory independence and queries and mutations.
  */
 class InventoryManagerTest {
 
@@ -147,4 +149,146 @@ class InventoryManagerTest {
 
         return new InventoryItem(product, 5);
     }
+
+        @Test
+        void addsNewInventoryItem() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of());
+        InventoryItem item = createItem(
+                1, "Soft Tires", "Maximum grip");
+
+        // Act
+        boolean added = manager.addInventoryItem(item);
+
+        // Assert
+        assertTrue(added);
+        assertEquals(1, manager.getAllInventoryItems().size());
+
+        InventoryItem result = manager.getInventoryItemByProductId(1);
+        assertNotNull(result);
+        assertEquals("Soft Tires", result.getProduct().getName());
+        assertEquals(5, result.getQuantityInStock());
+        }
+
+        @Test
+        void rejectsDuplicateProductId() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createItem(1, "Soft Tires", "Maximum grip")));
+
+        InventoryItem duplicate = createItem(
+                1, "Hard Tires", "Long race stints");
+
+        // Act
+        boolean added = manager.addInventoryItem(duplicate);
+
+        // Assert
+        assertFalse(added);
+        assertEquals(1, manager.getAllInventoryItems().size());
+        assertEquals("Soft Tires",
+                manager.getInventoryItemByProductId(1)
+                        .getProduct().getName());
+        assertEquals(5,
+                manager.getInventoryItemByProductId(1)
+                        .getQuantityInStock());
+        }
+
+        @Test
+        void updatesProductAndPreservesStock() {
+        // Arrange
+        InventoryItem original = createItem(
+                1, "Soft Tires", "Maximum grip");
+        original.increaseQuantity(3);
+
+        InventoryManager manager = new InventoryManager(
+                List.of(original));
+
+        Product updatedProduct = createItem(
+                1, "Updated Tires", "Updated description")
+                .getProduct();
+
+        // Act
+        boolean updated = manager.updateProduct(updatedProduct);
+
+        // Assert
+        assertTrue(updated);
+        assertEquals(1, manager.getAllInventoryItems().size());
+
+        InventoryItem result = manager.getInventoryItemByProductId(1);
+        assertNotNull(result);
+        assertEquals("Updated Tires", result.getProduct().getName());
+        assertEquals("Updated description",
+                result.getProduct().getDescription());
+        assertEquals(8, result.getQuantityInStock());
+        }
+
+        @Test
+        void doesNotUpdateUnknownProduct() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createItem(1, "Soft Tires", "Maximum grip")));
+
+        Product unknownProduct = createItem(
+                99, "Hard Tires", "Long race stints")
+                .getProduct();
+
+        // Act
+        boolean updated = manager.updateProduct(unknownProduct);
+
+        // Assert
+        assertFalse(updated);
+        assertNull(manager.getInventoryItemByProductId(99));
+        assertEquals(1, manager.getAllInventoryItems().size());
+        assertEquals("Soft Tires",
+                manager.getInventoryItemByProductId(1)
+                        .getProduct().getName());
+        assertEquals(5,
+                manager.getInventoryItemByProductId(1)
+                        .getQuantityInStock());
+        }
+
+        @Test
+        void removesExistingProduct() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createItem(1, "Soft Tires", "Maximum grip"),
+                createItem(2, "Hard Tires", "Long race stints")));
+
+        // Act
+        boolean removed = manager.removeProductById(1);
+
+        // Assert
+        assertTrue(removed);
+        assertNull(manager.getInventoryItemByProductId(1));
+        assertEquals(1, manager.getAllInventoryItems().size());
+        assertEquals(2,
+                manager.getAllInventoryItems().get(0)
+                        .getProduct().getId());
+        assertEquals(5,
+                manager.getInventoryItemByProductId(2)
+                        .getQuantityInStock());
+        }
+
+        @Test
+        void doesNotRemoveOtherItemsForUnknownId() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createItem(1, "Soft Tires", "Maximum grip"),
+                createItem(2, "Hard Tires", "Long race stints")));
+
+        // Act
+        boolean removed = manager.removeProductById(99);
+
+        // Assert
+        assertFalse(removed);
+        assertEquals(2, manager.getAllInventoryItems().size());
+        assertNotNull(manager.getInventoryItemByProductId(1));
+        assertNotNull(manager.getInventoryItemByProductId(2));
+        assertEquals(5,
+                manager.getInventoryItemByProductId(1)
+                        .getQuantityInStock());
+        assertEquals(5,
+                manager.getInventoryItemByProductId(2)
+                        .getQuantityInStock());
+}
 }
