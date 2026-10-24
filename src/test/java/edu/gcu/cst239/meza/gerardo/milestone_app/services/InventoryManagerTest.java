@@ -15,7 +15,7 @@ import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.Product;
 
 /**
- * Verifies inventory independence and queries and mutations.
+ * Verifies inventory independence, queries, mutations, and sorting.
  */
 class InventoryManagerTest {
 
@@ -135,23 +135,8 @@ class InventoryManagerTest {
         assertEquals(1, descriptionMatches.get(0).getProduct().getId());
     }
 
-    private InventoryItem createItem(
-            int id, String name, String description) {
-
-        Product product = Product.builder()
-                .id(id)
-                .name(name)
-                .description(description)
-                .dateOfManufacture(LocalDate.of(2026, 1, 15))
-                .price(100.00)
-                .category("tires")
-                .build();
-
-        return new InventoryItem(product, 5);
-    }
-
-        @Test
-        void addsNewInventoryItem() {
+    @Test
+    void addsNewInventoryItem() {
         // Arrange
         InventoryManager manager = new InventoryManager(List.of());
         InventoryItem item = createItem(
@@ -168,10 +153,10 @@ class InventoryManagerTest {
         assertNotNull(result);
         assertEquals("Soft Tires", result.getProduct().getName());
         assertEquals(5, result.getQuantityInStock());
-        }
+    }
 
-        @Test
-        void rejectsDuplicateProductId() {
+    @Test
+    void rejectsDuplicateProductId() {
         // Arrange
         InventoryManager manager = new InventoryManager(List.of(
                 createItem(1, "Soft Tires", "Maximum grip")));
@@ -191,17 +176,17 @@ class InventoryManagerTest {
         assertEquals(5,
                 manager.getInventoryItemByProductId(1)
                         .getQuantityInStock());
-        }
+    }
 
-        @Test
-        void updatesProductAndPreservesStock() {
+    @Test
+    void updatesProductAndPreservesStock() {
         // Arrange
         InventoryItem original = createItem(
                 1, "Soft Tires", "Maximum grip");
         original.increaseQuantity(3);
 
-        InventoryManager manager = new InventoryManager(
-                List.of(original));
+        InventoryManager manager =
+                new InventoryManager(List.of(original));
 
         Product updatedProduct = createItem(
                 1, "Updated Tires", "Updated description")
@@ -220,10 +205,10 @@ class InventoryManagerTest {
         assertEquals("Updated description",
                 result.getProduct().getDescription());
         assertEquals(8, result.getQuantityInStock());
-        }
+    }
 
-        @Test
-        void doesNotUpdateUnknownProduct() {
+    @Test
+    void doesNotUpdateUnknownProduct() {
         // Arrange
         InventoryManager manager = new InventoryManager(List.of(
                 createItem(1, "Soft Tires", "Maximum grip")));
@@ -245,10 +230,10 @@ class InventoryManagerTest {
         assertEquals(5,
                 manager.getInventoryItemByProductId(1)
                         .getQuantityInStock());
-        }
+    }
 
-        @Test
-        void removesExistingProduct() {
+    @Test
+    void removesExistingProduct() {
         // Arrange
         InventoryManager manager = new InventoryManager(List.of(
                 createItem(1, "Soft Tires", "Maximum grip"),
@@ -267,10 +252,10 @@ class InventoryManagerTest {
         assertEquals(5,
                 manager.getInventoryItemByProductId(2)
                         .getQuantityInStock());
-        }
+    }
 
-        @Test
-        void doesNotRemoveOtherItemsForUnknownId() {
+    @Test
+    void doesNotRemoveOtherItemsForUnknownId() {
         // Arrange
         InventoryManager manager = new InventoryManager(List.of(
                 createItem(1, "Soft Tires", "Maximum grip"),
@@ -290,5 +275,118 @@ class InventoryManagerTest {
         assertEquals(5,
                 manager.getInventoryItemByProductId(2)
                         .getQuantityInStock());
-}
+    }
+
+    @Test
+    void sortsInventoryByName() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createItem(1, "Soft Tires", "Maximum grip"),
+                createItem(2, "Front Wing", "Extra downforce"),
+                createItem(3, "Engine", "Power unit")));
+
+        // Act
+        List<InventoryItem> result =
+                manager.getInventoryItemsSortedByName();
+
+        // Assert: Engine, Front Wing, Soft Tires
+        assertEquals(List.of(3, 2, 1), result.stream()
+                .map(item -> item.getProduct().getId())
+                .toList());
+    }
+
+    @Test
+    void sortsInventoryByPrice() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createSortingItem(
+                        1, 300.00, LocalDate.of(2026, 1, 1)),
+                createSortingItem(
+                        2, 100.00, LocalDate.of(2026, 1, 1)),
+                createSortingItem(
+                        3, 200.00, LocalDate.of(2026, 1, 1))));
+
+        // Act
+        List<InventoryItem> result =
+                manager.getInventoryItemsSortedByPrice();
+
+        // Assert: 100, 200, 300
+        assertEquals(List.of(2, 3, 1), result.stream()
+                .map(item -> item.getProduct().getId())
+                .toList());
+    }
+
+    @Test
+    void sortsInventoryByManufactureDate() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createSortingItem(
+                        1, 100.00, LocalDate.of(2026, 3, 1)),
+                createSortingItem(
+                        2, 100.00, LocalDate.of(2026, 1, 1)),
+                createSortingItem(
+                        3, 100.00, LocalDate.of(2026, 2, 1))));
+
+        // Act
+        List<InventoryItem> result =
+                manager.getInventoryItemsSortedByDate();
+
+        // Assert: January, February, March
+        assertEquals(List.of(2, 3, 1), result.stream()
+                .map(item -> item.getProduct().getId())
+                .toList());
+    }
+
+    @Test
+    void sortingDoesNotChangeStoredOrder() {
+        // Arrange
+        InventoryManager manager = new InventoryManager(List.of(
+                createSortingItem(
+                        3, 300.00, LocalDate.of(2026, 3, 1)),
+                createSortingItem(
+                        1, 100.00, LocalDate.of(2026, 1, 1)),
+                createSortingItem(
+                        2, 200.00, LocalDate.of(2026, 2, 1))));
+
+        // Act
+        manager.getInventoryItemsSortedByName();
+        manager.getInventoryItemsSortedByPrice();
+        manager.getInventoryItemsSortedByDate();
+
+        // Assert: stored order remains unchanged
+        assertEquals(List.of(3, 1, 2),
+                manager.getAllInventoryItems().stream()
+                        .map(item -> item.getProduct().getId())
+                        .toList());
+    }
+
+    private InventoryItem createItem(
+            int id, String name, String description) {
+
+        Product product = Product.builder()
+                .id(id)
+                .name(name)
+                .description(description)
+                .dateOfManufacture(LocalDate.of(2026, 1, 15))
+                .price(100.00)
+                .category("tires")
+                .build();
+
+        return new InventoryItem(product, 5);
+    }
+
+    private InventoryItem createSortingItem(
+            int id, double price, LocalDate date) {
+
+        Product product = Product.builder()
+                .id(id)
+                .name("Test Part " + id)
+                .description("Part for sorting tests")
+                .dateOfManufacture(date)
+                .price(price)
+                .category("tires")
+                .build();
+
+        return new InventoryItem(product, 5);
+    }
 }
