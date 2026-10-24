@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Collection;
+import java.util.Objects;
 
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.Product;
@@ -340,5 +342,30 @@ public class InventoryManager implements InventoryService {
     @Override
     public void clearInventory() {
         inventory.clear();
+    }
+    /**
+     * Creates an inventory manager using a controlled collection.
+     * Copies each inventory item so stock quantities are not shared
+     * with the supplied collection.
+     *
+     * @param initialInventory inventory items to copy
+     * @throws NullPointerException if the collection or an item is null
+     */
+    public InventoryManager(
+            Collection<InventoryItem> initialInventory) {
+
+        Objects.requireNonNull(
+                initialInventory, "Initial inventory is required.");
+
+        inventory = new ArrayList<>();
+
+        for (InventoryItem item : initialInventory) {
+            Objects.requireNonNull(
+                    item, "Inventory item is required.");
+
+            inventory.add(new InventoryItem(
+                    item.getProduct(),
+                    item.getQuantityInStock()));
+        }
     }
 }
