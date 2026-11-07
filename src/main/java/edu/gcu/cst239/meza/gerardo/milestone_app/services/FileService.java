@@ -16,6 +16,7 @@ import edu.gcu.cst239.meza.gerardo.milestone_app.dtos.ProductCategoryDto;
 import edu.gcu.cst239.meza.gerardo.milestone_app.dtos.ProductDto;
 import edu.gcu.cst239.meza.gerardo.milestone_app.mappers.ProductMapper;
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
+import edu.gcu.cst239.meza.gerardo.milestone_app.models.Product;
 
 public class FileService {
 
@@ -159,5 +160,42 @@ public class FileService {
                             + dto.id(),
                     exception);
         }
+    }
+    public void saveInventory(
+            List<InventoryItem> inventory,
+            Path productsPath,
+            Path categoriesPath) throws IOException {
+
+        if (inventory == null) {
+            throw new IllegalArgumentException(
+                    "Inventory is required.");
+        }
+
+        Set<String> categories = loadCategories(categoriesPath);
+
+        List<ProductDto> products = new ArrayList<>();
+        Set<Integer> productIds = new HashSet<>();
+
+        for (InventoryItem item : inventory) {
+            if (item == null) {
+                throw new IllegalArgumentException(
+                        "Inventory items cannot be null.");
+            }
+
+            Product product = item.getProduct();
+            ProductDto dto = productMapper.toDto(product);
+
+            validateProduct(dto, categories);
+
+            if (!productIds.add(dto.id())) {
+                throw new IllegalArgumentException(
+                        "Duplicate product ID: " + dto.id());
+            }
+
+            products.add(dto);
+        }
+
+        objectMapper.writerWithDefaultPrettyPrinter()
+                .writeValue(productsPath.toFile(), products);
     }
 }

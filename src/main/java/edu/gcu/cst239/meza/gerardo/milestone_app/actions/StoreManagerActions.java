@@ -1,5 +1,6 @@
 package edu.gcu.cst239.meza.gerardo.milestone_app.actions;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -10,25 +11,16 @@ import edu.gcu.cst239.meza.gerardo.milestone_app.services.StoreFront;
 import edu.gcu.cst239.meza.gerardo.milestone_app.util.InputUtilities;
 
 /**
- * Handles console interaction for store-manager inventory operations.
- * Business and collection operations are delegated to InventoryService.
+ * Handles console interaction for store-manager operations.
  */
 public class StoreManagerActions {
 
     private final StoreFront store;
 
-    /**
-     * Creates the store-manager actions controller.
-     *
-     * @param store shared storefront application
-     */
     public StoreManagerActions(StoreFront store) {
         this.store = store;
     }
 
-    /**
-     * Displays and handles the store-manager menu.
-     */
     public void handleManagerActions() {
         InputUtilities input = new InputUtilities();
         boolean exitRequested = false;
@@ -70,13 +62,11 @@ public class StoreManagerActions {
                     break;
 
                 case 6:
-                    displayPlaceholder(
-                            "save inventory to a file");
+                    saveInventory();
                     break;
 
                 case 7:
-                    displayPlaceholder(
-                            "load inventory from a file");
+                    loadInventory();
                     break;
 
                 case 0:
@@ -90,12 +80,9 @@ public class StoreManagerActions {
         }
     }
 
-    /**
-     * Displays every inventory product and its current stock quantity.
-     * Inventory is retrieved through the shared inventory service.
-     */
     private void displayProducts() {
         InventoryService inventoryService = store.getInventoryManager();
+
         List<InventoryItem> items =
                 inventoryService.getAllInventoryItems();
 
@@ -112,12 +99,6 @@ public class StoreManagerActions {
         }
     }
 
-    /**
-     * Lets the manager search inventory by product name or description
-     * and displays every matching item.
-     *
-     * @param input utility used to read console input
-     */
     private void searchProducts(InputUtilities input) {
         System.out.println();
         System.out.println("--- Search Inventory ---");
@@ -162,12 +143,6 @@ public class StoreManagerActions {
         }
     }
 
-    /**
-     * Collects product information and a starting stock quantity,
-     * then delegates adding the item to the inventory service.
-     *
-     * @param input utility used to read console input
-     */
     private void addProduct(InputUtilities input) {
         InventoryService inventoryService = store.getInventoryManager();
 
@@ -220,20 +195,13 @@ public class StoreManagerActions {
                 System.out.println(
                         "Product could not be added. Inventory was not changed.");
             }
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | IllegalStateException exception) {
             System.out.println(
                     "Product could not be added: "
                             + exception.getMessage());
         }
     }
 
-    /**
-     * Prompts until the user enters nonblank text.
-     *
-     * @param input utility used to read console input
-     * @param prompt message describing the requested value
-     * @return trimmed, nonblank text
-     */
     private String readRequiredText(
             InputUtilities input, String prompt) {
 
@@ -248,12 +216,6 @@ public class StoreManagerActions {
         }
     }
 
-    /**
-     * Collects a product ID and delegates inventory removal
-     * to the shared inventory service.
-     *
-     * @param input utility used to read console input
-     */
     private void removeProduct(InputUtilities input) {
         System.out.println();
         System.out.println("--- Remove Product from Inventory ---");
@@ -271,12 +233,6 @@ public class StoreManagerActions {
         }
     }
 
-    /**
-     * Updates either product information or stock quantity for an
-     * existing product. Product information updates preserve stock.
-     *
-     * @param input utility used to read console input
-     */
     private void updateProduct(InputUtilities input) {
         InventoryService inventoryService = store.getInventoryManager();
 
@@ -355,20 +311,45 @@ public class StoreManagerActions {
                 System.out.println(
                         "Product could not be updated. Inventory was not changed.");
             }
-        } catch (IllegalArgumentException exception) {
+        } catch (IllegalArgumentException | IllegalStateException exception) {
             System.out.println(
                     "Product could not be updated: "
                             + exception.getMessage());
         }
     }
-    /**
-     * Displays a message for an operation that is not implemented yet.
-     *
-     * @param action description of the selected action
-     */
-    private void displayPlaceholder(String action) {
-        System.out.println("You chose to " + action + ".");
-        System.out.println(
-                "This feature has not been implemented yet.");
+
+    private void saveInventory() {
+        try {
+            store.saveInventory();
+
+            System.out.println(
+                    "Product data saved successfully.");
+
+        } catch (IOException | IllegalArgumentException exception) {
+            System.out.println(
+                    "Unable to save product data: "
+                            + exception.getMessage());
+        }
+    }
+
+    private void loadInventory() {
+        try {
+            store.loadInventory();
+
+            int count = store.getInventoryManager()
+                    .getAllInventoryItems()
+                    .size();
+
+            System.out.println(
+                    "Loaded " + count + " products from JSON.");
+
+            System.out.println(
+                    "Stock quantities reset to 10. Shopping cart cleared.");
+
+        } catch (IOException | IllegalArgumentException exception) {
+            System.out.println(
+                    "Unable to load product data: "
+                            + exception.getMessage());
+        }
     }
 }

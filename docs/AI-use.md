@@ -41,3 +41,20 @@
   confirmed 100 products loaded with a starting stock of 10 each.
 - Design decision: Stock starts at 10 because the required product
   JSON contract does not contain a quantity field.
+
+  ## Branch: feature/json-saving
+
+- Date: November 6, 2026
+- AI system: ChatGPT
+- Model: GPT-6.1
+- Prompt summary: Implement JSON saving and connect manager
+  save/load menu options.
+- Assistance: Generated saving logic and updates to StoreFront
+  and StoreManagerActions.
+- Corrections: Restored menu option 5, removed duplicate case 7,
+  and replaced placeholder methods.
+- Verification: Maven clean test passed. Modified a product,
+  saved, reloaded, and restarted the application. Product changes
+  persisted.
+- Limitation: Stock quantities are not included in the product
+  JSON contract and reset to 10 when loaded.
