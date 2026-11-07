@@ -73,3 +73,20 @@
   categories, dates, prices, and null products.
 - Design decision: Tests supply known categories directly,
   avoiding dependencies on production JSON files or console input.
+
+  ## Branch: feature/persistence-tests
+
+- Date: November 7, 2026
+- AI system: ChatGPT
+- Model: GPT-6.1
+- Prompt summary: Add focused tests for JSON loading, saving,
+  round trips, record counts, and error handling.
+- Assistance: Generated FileServiceTest using temporary files
+  and small, controlled datasets.
+- Verification: Ran the complete Maven clean test suite
+  successfully.
+- Coverage: DTO/domain loading, record counts, preservation of
+  product values, malformed JSON, unknown categories, duplicate
+  IDs, missing files, and validation failure before saving.
+- Production resource: A separate test confirms that the supplied
+  JSON loads exactly 100 valid products.
