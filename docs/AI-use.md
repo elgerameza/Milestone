@@ -27,3 +27,17 @@
 - Verification: Added the code and ran the complete Maven test
   suite. All 30 tests passed. Mapping tests verified every product
   field and date conversion in both directions.
+
+  ## Branch: feature/json-loading
+
+- Date: November 6, 2026
+- AI system: ChatGPT
+- Model: GPT-6.1
+- Prompt summary: Add Jackson JSON loading, validate products and
+  categories, and replace hard-coded startup inventory.
+- Assistance: Generated FileService and updates to InventoryManager,
+  StoreFront, and MilestoneApplication.
+- Verification: Maven clean test passed. Ran the application and
+  confirmed 100 products loaded with a starting stock of 10 each.
+- Design decision: Stock starts at 10 because the required product
+  JSON contract does not contain a quantity field.
