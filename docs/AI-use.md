@@ -58,3 +58,18 @@
   persisted.
 - Limitation: Stock quantities are not included in the product
   JSON contract and reset to 10 when loaded.
+
+  ## Branch: feature/service-unit-tests
+
+- Date: November 7, 2026
+- AI system: ChatGPT
+- Model: GPT-6.1
+- Prompt summary: Review service test coverage and make product
+  validation testable without file I/O.
+- Assistance: Extracted ProductValidator, updated FileService,
+  and generated validation tests.
+- Verification: Reviewed existing inventory and mapping tests.
+  Ran Maven clean test successfully after adding tests for
+  categories, dates, prices, and null products.
+- Design decision: Tests supply known categories directly,
+  avoiding dependencies on production JSON files or console input.
