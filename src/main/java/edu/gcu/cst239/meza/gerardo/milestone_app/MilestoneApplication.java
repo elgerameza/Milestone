@@ -1,28 +1,42 @@
 package edu.gcu.cst239.meza.gerardo.milestone_app;
 
+import java.io.IOException;
+
 import edu.gcu.cst239.meza.gerardo.milestone_app.actions.StartingActions;
 import edu.gcu.cst239.meza.gerardo.milestone_app.services.StoreFront;
 
 /**
- * Provides the entry point for the storefront application
- * 
- * MilestoneApplication
+ * Provides the entry point for the storefront application.
  */
 public class MilestoneApplication {
+
     /**
-     * Starts the storefront console application
-     * 
+     * Loads store data and starts the console application.
+     *
      * @param args command line arguments
      */
     public static void main(String[] args) {
+        System.out.println("Milestone application starting...");
 
-        System.out.println("Milestone application starting... ");
-        StoreFront store = new StoreFront();
-        StartingActions startingActions = new StartingActions(store);
+        try {
+            StoreFront store = new StoreFront();
 
-        startingActions.start();
-        // Create the application objects and begin the console workflow.
+            int productCount = store.getInventoryManager()
+                    .getAllInventoryItems()
+                    .size();
+
+            System.out.println(
+                    "Loaded " + productCount + " products from JSON.");
+
+            StartingActions startingActions =
+                    new StartingActions(store);
+
+            startingActions.start();
+
+        } catch (IOException | IllegalArgumentException exception) {
+            System.err.println(
+                    "Unable to load store data: "
+                            + exception.getMessage());
+        }
     }
 }
-
-

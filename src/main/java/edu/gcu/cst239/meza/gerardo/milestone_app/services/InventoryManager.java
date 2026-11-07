@@ -1,103 +1,59 @@
 package edu.gcu.cst239.meza.gerardo.milestone_app.services;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
-import java.util.Collection;
 import java.util.Objects;
 
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.InventoryItem;
 import edu.gcu.cst239.meza.gerardo.milestone_app.models.Product;
 
 /**
- * Manages the collection of products available in the formula-car
- * parts inventory.
- *
- * InventoryManager performs inventory operations without directly
- * reading from or writing to the console.
+ * Manages inventory without console input or file operations.
  *
  * @author Gerardo Meza
- * @version 1.0
  */
 public class InventoryManager implements InventoryService {
 
     private final List<InventoryItem> inventory;
 
     /**
-     * Creates the inventory manager and initializes its inventory.
+     * Creates an empty inventory.
      */
     public InventoryManager() {
         inventory = new ArrayList<>();
-        initializeInventory();
     }
 
     /**
-     * Creates the initial formula-car parts inventory.
-     */
-    private void initializeInventory() {
-        Product softTireSet = Product.builder()
-                .id(1)
-                .name("Soft Compound Tire Set")
-                .description(
-                        "Set of four soft-compound tires designed for maximum grip")
-                .dateOfManufacture(LocalDate.of(2026, 8, 10))
-                .price(2400.00)
-                .category("tires")
-                .build();
-
-        Product mediumTireSet = Product.builder()
-                .id(2)
-                .name("Medium Compound Tire Set")
-                .description(
-                        "Set of four medium-compound tires balancing grip and durability")
-                .dateOfManufacture(LocalDate.of(2026, 8, 12))
-                .price(2300.00)
-                .category("tires")
-                .build();
-
-        Product hardTireSet = Product.builder()
-                .id(3)
-                .name("Hard Compound Tire Set")
-                .description(
-                        "Set of four hard-compound tires designed for long race stints")
-                .dateOfManufacture(LocalDate.of(2026, 8, 14))
-                .price(2200.00)
-                .category("tires")
-                .build();
-
-        Product formulaCarEngine = Product.builder()
-                .id(4)
-                .name("Formula Car Engine")
-                .description(
-                        "High-performance engine designed for a formula racing car")
-                .dateOfManufacture(LocalDate.of(2026, 7, 20))
-                .price(500000.00)
-                .category("power-unit")
-                .build();
-
-        Product frontWingAssembly = Product.builder()
-                .id(5)
-                .name("Front Wing Assembly")
-                .description(
-                        "Adjustable front wing assembly designed to generate front-end downforce")
-                .dateOfManufacture(LocalDate.of(2026, 8, 5))
-                .price(150000.00)
-                .category("aerodynamics")
-                .build();
-
-        inventory.add(new InventoryItem(softTireSet, 6));
-        inventory.add(new InventoryItem(mediumTireSet, 6));
-        inventory.add(new InventoryItem(hardTireSet, 4));
-        inventory.add(new InventoryItem(formulaCarEngine, 2));
-        inventory.add(new InventoryItem(frontWingAssembly, 3));
-    }
-
-    /**
-     * Returns a read-only copy of the current inventory.
+     * Creates inventory from supplied items.
+     * Copies each item so stock quantities are independent.
      *
-     * @return all inventory items
+     * @param initialInventory inventory items to copy
+     */
+    public InventoryManager(
+            Collection<InventoryItem> initialInventory) {
+
+        Objects.requireNonNull(
+                initialInventory,
+                "Initial inventory is required.");
+
+        inventory = new ArrayList<>();
+
+        for (InventoryItem item : initialInventory) {
+            Objects.requireNonNull(
+                    item,
+                    "Inventory item is required.");
+
+            inventory.add(new InventoryItem(
+                    item.getProduct(),
+                    item.getQuantityInStock()));
+        }
+    }
+
+    /**
+     * Returns a read-only copy of the inventory list.
      */
     @Override
     public List<InventoryItem> getAllInventoryItems() {
@@ -105,14 +61,12 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Returns inventory in ascending, case-insensitive product name
-     * order without changing the stored inventory order.
-     *
-     * @return a sorted copy of the inventory
+     * Returns inventory sorted by product name.
      */
     @Override
     public List<InventoryItem> getInventoryItemsSortedByName() {
-        List<InventoryItem> sortedItems = new ArrayList<>(inventory);
+        List<InventoryItem> sortedItems =
+                new ArrayList<>(inventory);
 
         sortedItems.sort(Comparator.comparing(
                 item -> item.getProduct().getName(),
@@ -122,14 +76,12 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Returns inventory from oldest to newest manufacture date
-     * without changing the stored inventory order.
-     *
-     * @return a sorted copy of the inventory
+     * Returns inventory sorted by manufacture date.
      */
     @Override
     public List<InventoryItem> getInventoryItemsSortedByDate() {
-        List<InventoryItem> sortedItems = new ArrayList<>(inventory);
+        List<InventoryItem> sortedItems =
+                new ArrayList<>(inventory);
 
         sortedItems.sort(Comparator.comparing(
                 item -> item.getProduct().getDateOfManufacture()));
@@ -138,14 +90,12 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Returns inventory from lowest to highest product price
-     * without changing the stored inventory order.
-     *
-     * @return a sorted copy of the inventory
+     * Returns inventory sorted by price.
      */
     @Override
     public List<InventoryItem> getInventoryItemsSortedByPrice() {
-        List<InventoryItem> sortedItems = new ArrayList<>(inventory);
+        List<InventoryItem> sortedItems =
+                new ArrayList<>(inventory);
 
         sortedItems.sort(Comparator.comparingDouble(
                 item -> item.getProduct().getPrice()));
@@ -154,10 +104,7 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Finds an inventory item using its product identifier.
-     *
-     * @param productId product identifier
-     * @return matching inventory item, or null when no match exists
+     * Finds an inventory item by product ID.
      */
     @Override
     public InventoryItem getInventoryItemByProductId(int productId) {
@@ -171,13 +118,12 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Searches product names using case-insensitive partial matching.
-     *
-     * @param searchTerm all or part of a product name
-     * @return matching inventory items
+     * Searches product names without case sensitivity.
      */
     @Override
-    public List<InventoryItem> searchProductsByName(String searchTerm) {
+    public List<InventoryItem> searchProductsByName(
+            String searchTerm) {
+
         List<InventoryItem> matches = new ArrayList<>();
 
         if (searchTerm == null || searchTerm.isBlank()) {
@@ -192,6 +138,7 @@ public class InventoryManager implements InventoryService {
 
             if (productName.toLowerCase(Locale.ROOT)
                     .contains(normalizedTerm)) {
+
                 matches.add(item);
             }
         }
@@ -200,11 +147,7 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Searches product descriptions using case-insensitive partial
-     * matching.
-     *
-     * @param searchTerm all or part of a product description
-     * @return matching inventory items
+     * Searches product descriptions without case sensitivity.
      */
     @Override
     public List<InventoryItem> searchProductsByDescription(
@@ -220,11 +163,12 @@ public class InventoryManager implements InventoryService {
                 searchTerm.trim().toLowerCase(Locale.ROOT);
 
         for (InventoryItem item : inventory) {
-            String productDescription =
+            String description =
                     item.getProduct().getDescription();
 
-            if (productDescription.toLowerCase(Locale.ROOT)
+            if (description.toLowerCase(Locale.ROOT)
                     .contains(normalizedTerm)) {
+
                 matches.add(item);
             }
         }
@@ -233,10 +177,7 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Adds an inventory item with a unique product identifier.
-     *
-     * @param item inventory item to add
-     * @return true when added; false if null or the ID already exists
+     * Adds an inventory item if its product ID is unique.
      */
     @Override
     public boolean addInventoryItem(InventoryItem item) {
@@ -254,10 +195,7 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Updates an existing product while preserving its stock quantity.
-     *
-     * @param updatedProduct updated product information
-     * @return true when updated; false if null or not found
+     * Updates product information while preserving stock.
      */
     @Override
     public boolean updateProduct(Product updatedProduct) {
@@ -284,21 +222,19 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Updates the quantity of an inventory item.
-     *
-     * @param productId product identifier
-     * @param quantityInStock new inventory quantity
-     * @return true when updated; false if negative or not found
+     * Updates an existing item's stock quantity.
      */
     @Override
     public boolean updateQuantity(
-            int productId, int quantityInStock) {
+            int productId,
+            int quantityInStock) {
 
         if (quantityInStock < 0) {
             return false;
         }
 
-        InventoryItem item = getInventoryItemByProductId(productId);
+        InventoryItem item =
+                getInventoryItemByProductId(productId);
 
         if (item == null) {
             return false;
@@ -311,23 +247,23 @@ public class InventoryManager implements InventoryService {
         }
 
         if (quantityInStock > currentQuantity) {
-            item.increaseQuantity(quantityInStock - currentQuantity);
+            item.increaseQuantity(
+                    quantityInStock - currentQuantity);
         } else {
-            item.decreaseQuantity(currentQuantity - quantityInStock);
+            item.decreaseQuantity(
+                    currentQuantity - quantityInStock);
         }
 
         return true;
     }
 
     /**
-     * Removes an inventory item using its product identifier.
-     *
-     * @param productId product identifier
-     * @return true when removed; false if not found
+     * Removes a product by ID.
      */
     @Override
     public boolean removeProductById(int productId) {
-        InventoryItem item = getInventoryItemByProductId(productId);
+        InventoryItem item =
+                getInventoryItemByProductId(productId);
 
         if (item == null) {
             return false;
@@ -337,35 +273,10 @@ public class InventoryManager implements InventoryService {
     }
 
     /**
-     * Removes all inventory items.
+     * Removes every inventory item.
      */
     @Override
     public void clearInventory() {
         inventory.clear();
-    }
-    /**
-     * Creates an inventory manager using a controlled collection.
-     * Copies each inventory item so stock quantities are not shared
-     * with the supplied collection.
-     *
-     * @param initialInventory inventory items to copy
-     * @throws NullPointerException if the collection or an item is null
-     */
-    public InventoryManager(
-            Collection<InventoryItem> initialInventory) {
-
-        Objects.requireNonNull(
-                initialInventory, "Initial inventory is required.");
-
-        inventory = new ArrayList<>();
-
-        for (InventoryItem item : initialInventory) {
-            Objects.requireNonNull(
-                    item, "Inventory item is required.");
-
-            inventory.add(new InventoryItem(
-                    item.getProduct(),
-                    item.getQuantityInStock()));
-        }
     }
 }
