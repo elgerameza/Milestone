@@ -1,0 +1,14 @@
+[
+  {
+    "category": "tires",
+    "description": "Racing tires and tire sets"
+  },
+  {
+    "category": "power-unit",
+    "description": "Engines and power-unit components"
+  },
+  {
+    "category": "aerodynamics",
+    "description": "Wings, diffusers, and aerodynamic components"
+  }
+]
