@@ -2,8 +2,6 @@ package edu.gcu.cst239.meza.gerardo.milestone_app.services;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.time.LocalDate;
-import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -41,6 +39,7 @@ public class FileService {
             Path categoriesPath) throws IOException {
 
         Set<String> categories = loadCategories(categoriesPath);
+        ProductValidator validator = new ProductValidator(categories);
 
         ProductDto[] products = objectMapper.readValue(
                 productsPath.toFile(),
@@ -55,7 +54,7 @@ public class FileService {
         Set<Integer> productIds = new HashSet<>();
 
         for (ProductDto dto : products) {
-            validateProduct(dto, categories);
+            validator.validate(dto);
 
             if (!productIds.add(dto.id())) {
                 throw new IllegalArgumentException(
@@ -106,61 +105,6 @@ public class FileService {
         return categories;
     }
 
-    private void validateProduct(
-            ProductDto dto,
-            Set<String> categories) {
-
-        if (dto == null) {
-            throw new IllegalArgumentException(
-                    "Product entries cannot be null.");
-        }
-
-        if (dto.id() <= 0) {
-            throw new IllegalArgumentException(
-                    "Product ID must be positive.");
-        }
-
-        if (dto.name() == null || dto.name().isBlank()) {
-            throw new IllegalArgumentException(
-                    "Product name is required for ID " + dto.id());
-        }
-
-        if (dto.description() == null) {
-            throw new IllegalArgumentException(
-                    "Product description is required for ID " + dto.id());
-        }
-
-        if (!Double.isFinite(dto.price()) || dto.price() <= 0) {
-            throw new IllegalArgumentException(
-                    "Product price must be positive for ID " + dto.id());
-        }
-
-        if (dto.category() == null
-                || !categories.contains(dto.category())) {
-
-            throw new IllegalArgumentException(
-                    "Unknown category for product ID " + dto.id()
-                            + ": " + dto.category());
-        }
-
-        if (dto.dateOfManufacture() == null
-                || !dto.dateOfManufacture()
-                        .matches("\\d{4}-\\d{2}-\\d{2}")) {
-
-            throw new IllegalArgumentException(
-                    "Date must use yyyy-MM-dd for product ID "
-                            + dto.id());
-        }
-
-        try {
-            LocalDate.parse(dto.dateOfManufacture());
-        } catch (DateTimeParseException exception) {
-            throw new IllegalArgumentException(
-                    "Invalid manufacture date for product ID "
-                            + dto.id(),
-                    exception);
-        }
-    }
     public void saveInventory(
             List<InventoryItem> inventory,
             Path productsPath,
@@ -172,6 +116,7 @@ public class FileService {
         }
 
         Set<String> categories = loadCategories(categoriesPath);
+        ProductValidator validator = new ProductValidator(categories);
 
         List<ProductDto> products = new ArrayList<>();
         Set<Integer> productIds = new HashSet<>();
@@ -185,7 +130,7 @@ public class FileService {
             Product product = item.getProduct();
             ProductDto dto = productMapper.toDto(product);
 
-            validateProduct(dto, categories);
+            validator.validate(dto);
 
             if (!productIds.add(dto.id())) {
                 throw new IllegalArgumentException(
